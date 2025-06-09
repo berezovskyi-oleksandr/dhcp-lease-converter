@@ -66,11 +66,11 @@ date_to_timestamp() {
 show_usage() {
     echo "Usage: $0 [--in-dhcpcd-lease FILE] [--in-dhcpcd-config FILE] [-o FILE] [--time-offset HOURS]" >&2
     echo "" >&2
-    echo "At least one input file is required (lease file or config file)." >&2
-    echo "" >&2
     echo "Options:" >&2
-    echo "  -i, --in-dhcpcd-lease FILE    Input dhcpcd lease file with dynamic leases" >&2
+    echo "  -i, --in-dhcpcd-lease FILE    Input dhcpcd lease file (use - for stdin)" >&2
     echo "  -c, --in-dhcpcd-config FILE   Input dhcpcd config file with static leases" >&2
+    echo "" >&2
+    echo "Note: At least one input file (-i or -c) must be provided" >&2
     echo "  -o, --output-lease FILE       Output file (use - for stdout, default: -)" >&2
     echo "  -t, --time-offset N           Hours to add/subtract from UTC time (e.g., -2, +3, default: 0)" >&2
     echo "  -v, --verbose                 Enable verbose/debug output" >&2
@@ -340,27 +340,35 @@ EOF
 
 main() {
     if [ -z "$lease_file" ] && [ -z "$config_file" ]; then
-        echo "Error: At least one input file is required." >&2
-        echo "Use -i for lease file or -c for config file (or both)." >&2
+        echo "Error: At least one input file (-i or -c) must be provided" >&2
         show_usage
     fi
 
-    if [ -n "$lease_file" ] && [ ! -f "$lease_file" ]; then
+    if [ -n "$lease_file" ] && [ "$lease_file" != "-" ] && [ ! -f "$lease_file" ]; then
         echo "Error: Lease file '$lease_file' not found" >&2
         exit 1
     fi
 
-    if [ -n "$config_file" ] && [ ! -f "$config_file" ]; then
+    if [ -n "$config_file" ] && [ "$config_file" != "-" ] && [ ! -f "$config_file" ]; then
         echo "Error: Config file '$config_file' not found" >&2
         exit 1
     fi
 
     if [ -n "$config_file" ]; then
-        process_config < "$config_file"
+        if [ "$config_file" = "-" ]; then
+            echo "Error: Config file cannot be read from stdin" >&2
+            exit 1
+        else
+            process_config < "$config_file"
+        fi
     fi
 
     if [ -n "$lease_file" ]; then
-        process_leases < "$lease_file"
+        if [ "$lease_file" = "-" ]; then
+            process_leases
+        else
+            process_leases < "$lease_file"
+        fi
     fi
 
     if [ "$output_file" = "-" ]; then
