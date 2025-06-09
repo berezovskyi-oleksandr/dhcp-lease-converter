@@ -30,7 +30,7 @@ true > "$LEASE_STARTS_FILE"
 extract_field() {
     line="$1"
     pattern="$2"
-    echo "$line" | sed -n "s/.*$pattern.*/\1/p"
+    echo "$line" | sed -nr "s/.*$pattern.*/\1/p"
 }
 
 log_verbose() {
@@ -42,13 +42,19 @@ log_verbose() {
 # Convert dhcpcd date format (YYYY/MM/DD HH:MM:SS) to unix timestamp
 date_to_timestamp() {
     date_str="$1"
-    formatted_date=""
-    formatted_date=$(echo "$date_str" | sed 's|/|-|g')
     
+    # Try BSD date format first (OPNsense/FreeBSD)
+    if command -v date >/dev/null 2>&1 && date -j -f "%Y/%m/%d %H:%M:%S" "$date_str" +%s 2>/dev/null; then
+        return
+    fi
+    
+    # Try busybox date with -D format
+    formatted_date=$(echo "$date_str" | sed 's|/|-|g')
     if date -D "%Y-%m-%d %H:%M:%S" -d "$formatted_date" +%s 2>/dev/null; then
         return
     fi
     
+    # Try GNU date with -d
     if date -d "$formatted_date" +%s 2>/dev/null; then
         return
     fi
@@ -158,21 +164,21 @@ process_config() {
         
         if [ $in_host -eq 1 ]; then
             if [ -z "$mac" ]; then
-                extracted_mac=$(echo "$line" | sed -n 's/.*hardware[[:space:]]\+ethernet[[:space:]]\+\([0-9a-fA-F:]\+\).*/\1/p')
+                extracted_mac=$(echo "$line" | sed -nr 's/.*hardware[[:space:]]+ethernet[[:space:]]+([0-9a-fA-F:]+).*/\1/p')
                 if [ -n "$extracted_mac" ]; then
                     mac="$extracted_mac"
                 fi
             fi
             
             if [ -z "$ip" ]; then
-                extracted_ip=$(echo "$line" | sed -n 's/.*fixed-address[[:space:]]\+\([0-9.]\+\).*/\1/p')
+                extracted_ip=$(echo "$line" | sed -nr 's/.*fixed-address[[:space:]]+([0-9.]+).*/\1/p')
                 if [ -n "$extracted_ip" ]; then
                     ip="$extracted_ip"
                 fi
             fi
             
             if [ -z "$hostname" ]; then
-                extracted_hostname=$(echo "$line" | sed -n 's/.*option[[:space:]]\+host-name[[:space:]]\+"\([^"]\+\)".*/\1/p')
+                extracted_hostname=$(echo "$line" | sed -nr 's/.*option[[:space:]]+host-name[[:space:]]+"([^"]+)".*/\1/p')
                 if [ -n "$extracted_hostname" ]; then
                     hostname="$extracted_hostname"
                 fi
@@ -226,7 +232,7 @@ process_leases() {
         line_num=$((line_num + 1))
         if echo "$line" | grep -q '^lease[[:space:]]\+[0-9.]\+[[:space:]]*{'; then
             in_lease=1
-            ip=$(echo "$line" | sed -n 's/^lease[[:space:]]\+\([0-9.]\+\)[[:space:]]*{.*/\1/p')
+            ip=$(echo "$line" | sed -nr 's/^lease[[:space:]]+([0-9.]+)[[:space:]]*\{.*/\1/p')
             log_verbose "Line $line_num: Found lease block for IP $ip"
             mac=""
             hostname=""
@@ -239,14 +245,14 @@ process_leases() {
         
         if [ $in_lease -eq 1 ]; then
             if [ -z "$mac" ]; then
-                extracted_mac=$(echo "$line" | sed -n 's/.*hardware[[:space:]]\+ethernet[[:space:]]\+\([0-9a-fA-F:]\+\).*/\1/p')
+                extracted_mac=$(echo "$line" | sed -nr 's/.*hardware[[:space:]]+ethernet[[:space:]]+([0-9a-fA-F:]+).*/\1/p')
                 if [ -n "$extracted_mac" ]; then
                     mac="$extracted_mac"
                 fi
             fi
             
             if [ -z "$hostname" ]; then
-                extracted_hostname=$(echo "$line" | sed -n 's/.*client-hostname[[:space:]]\+"\([^"]\+\)".*/\1/p')
+                extracted_hostname=$(echo "$line" | sed -nr 's/.*client-hostname[[:space:]]+"([^"]+)".*/\1/p')
                 if [ -n "$extracted_hostname" ]; then
                     hostname="$extracted_hostname"
                 fi
@@ -257,21 +263,21 @@ process_leases() {
             fi
             
             if [ -z "$starts" ]; then
-                extracted_starts=$(echo "$line" | sed -n 's/.*starts[[:space:]]\+[0-9]\+[[:space:]]\+\([0-9]\{4\}\/[0-9]\{2\}\/[0-9]\{2\}[[:space:]]\+[0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}\).*/\1/p')
+                extracted_starts=$(echo "$line" | sed -nr 's/.*starts[[:space:]]+[0-9]+[[:space:]]+([0-9]{4}\/[0-9]{2}\/[0-9]{2}[[:space:]]+[0-9]{2}:[0-9]{2}:[0-9]{2}).*/\1/p')
                 if [ -n "$extracted_starts" ]; then
                     starts="$extracted_starts"
                 fi
             fi
             
             if [ -z "$ends" ]; then
-                extracted_ends=$(echo "$line" | sed -n 's/.*ends[[:space:]]\+[0-9]\+[[:space:]]\+\([0-9]\{4\}\/[0-9]\{2\}\/[0-9]\{2\}[[:space:]]\+[0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}\).*/\1/p')
+                extracted_ends=$(echo "$line" | sed -nr 's/.*ends[[:space:]]+[0-9]+[[:space:]]+([0-9]{4}\/[0-9]{2}\/[0-9]{2}[[:space:]]+[0-9]{2}:[0-9]{2}:[0-9]{2}).*/\1/p')
                 if [ -n "$extracted_ends" ]; then
                     ends="$extracted_ends"
                 fi
             fi
             
             if [ -z "$binding_state" ] && echo "$line" | grep -q 'binding[[:space:]]\+state[[:space:]]\+[a-z]\+'; then
-                binding_state=$(echo "$line" | sed -n 's/.*binding[[:space:]]\+state[[:space:]]\+\([a-z]\+\).*/\1/p')
+                binding_state=$(echo "$line" | sed -nr 's/.*binding[[:space:]]+state[[:space:]]+([a-z]+).*/\1/p')
             fi
             
             if echo "$line" | grep -q '^}'; then
