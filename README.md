@@ -89,6 +89,13 @@ The script outputs [dnsmasq lease file format](https://deepwiki.com/imp/dnsmasq/
    chmod +x dhcp-lease-converter.sh
    ```
 
+## Integration with OPNsense and OpenWRT
+
+For a complete guide on integrating this tool with OPNsense DHCP server and OpenWRT access points, see [INTEGRATION.md](INTEGRATION.md). This guide includes:
+- Step-by-step OPNsense setup with cron jobs
+- OpenWRT configuration for automatic lease updates
+- Troubleshooting tips
+
 ## Requirements
 
 - POSIX-compatible shell (bash, dash, busybox sh)
