@@ -1,0 +1,73 @@
+lease 192.168.1.100 {
+  starts 4 2025/01/08 15:30:45;
+  ends 4 2025/01/09 15:30:45;
+  cltt 4 2025/01/08 15:30:45;
+  binding state active;
+  next binding state free;
+  hardware ethernet aa:bb:cc:dd:ee:01;
+  uid "\001\252\273\314\335\356\001";
+  client-hostname "laptop-user1";
+}
+
+lease 192.168.1.101 {
+  starts 4 2025/01/08 16:15:22;
+  ends 4 2025/01/09 16:15:22;
+  cltt 4 2025/01/08 16:15:22;
+  binding state active;
+  next binding state free;
+  hardware ethernet aa:bb:cc:dd:ee:02;
+  uid "\001\252\273\314\335\356\002";
+  client-hostname "desktop-user2";
+}
+
+lease 192.168.1.102 {
+  starts 4 2025/01/08 14:20:10;
+  ends 4 2025/01/09 14:20:10;
+  cltt 4 2025/01/08 14:20:10;
+  binding state active;
+  next binding state free;
+  hardware ethernet aa:bb:cc:dd:ee:03;
+  client-hostname "smart-tv";
+}
+
+lease 192.168.1.103 {
+  starts 4 2025/01/08 17:45:33;
+  ends 4 2025/01/09 17:45:33;
+  cltt 4 2025/01/08 17:45:33;
+  binding state active;
+  next binding state free;
+  hardware ethernet aa:bb:cc:dd:ee:04;
+  uid "\001\252\273\314\335\356\004";
+  client-hostname "phone-android";
+}
+
+lease 192.168.1.104 {
+  starts 4 2025/01/08 12:10:05;
+  ends 4 2025/01/09 12:10:05;
+  cltt 4 2025/01/08 12:10:05;
+  binding state active;
+  next binding state free;
+  hardware ethernet aa:bb:cc:dd:ee:05;
+  client-hostname "iot-sensor1";
+}
+
+lease 192.168.1.105 {
+  starts 4 2025/01/08 18:30:15;
+  ends 4 2025/01/09 18:30:15;
+  cltt 4 2025/01/08 18:30:15;
+  binding state active;
+  next binding state free;
+  hardware ethernet aa:bb:cc:dd:ee:06;
+  uid "\001\252\273\314\335\356\006";
+  client-hostname "wireless-printer";
+}
+
+lease 192.168.1.200 {
+  starts 4 2025/01/07 10:00:00;
+  ends 4 2025/01/08 10:00:00;
+  cltt 4 2025/01/07 10:00:00;
+  binding state expired;
+  next binding state free;
+  hardware ethernet aa:bb:cc:dd:ee:99;
+  client-hostname "old-device";
+}

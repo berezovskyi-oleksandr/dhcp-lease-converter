@@ -1,0 +1,12 @@
+1736417405 aa:bb:cc:dd:ee:05 192.168.1.104 iot-sensor1 *
+1736425210 aa:bb:cc:dd:ee:03 192.168.1.102 smart-tv *
+1736429445 aa:bb:cc:dd:ee:01 192.168.1.100 laptop-user1 01:aabbccddee01
+1736432122 aa:bb:cc:dd:ee:02 192.168.1.101 desktop-user2 01:aabbccddee02
+1736437533 aa:bb:cc:dd:ee:04 192.168.1.103 phone-android 01:aabbccddee04
+1736440215 aa:bb:cc:dd:ee:06 192.168.1.105 wireless-printer 01:aabbccddee06
+2147476447 11:22:33:44:55:01 192.168.1.10 web-server *
+2147476447 11:22:33:44:55:02 192.168.1.11 database-server *
+2147476447 11:22:33:44:55:03 192.168.1.12 file-server *
+2147476447 11:22:33:44:55:10 192.168.2.20 smart-thermostat *
+2147476447 11:22:33:44:55:11 192.168.2.21 security-camera *
+2147476447 11:22:33:44:55:12 192.168.2.22 smart-switch *

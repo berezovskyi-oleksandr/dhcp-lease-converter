@@ -1,0 +1,74 @@
+option domain-name "example.local";
+option ldap-server code 95 = text;
+option arch code 93 = unsigned integer 16; # RFC4578
+option pac-webui code 252 = text;
+
+default-lease-time 7200;
+max-lease-time 86400;
+log-facility local7;
+one-lease-per-client true;
+deny duplicates;
+ping-check true;
+update-conflict-detection false;
+authoritative;
+
+subnet 192.168.1.0 netmask 255.255.255.0 {
+  pool {
+    range 192.168.1.100 192.168.1.200;
+  }
+
+  option routers 192.168.1.1;
+  option domain-name-servers 192.168.1.1;
+}
+
+host server1 {
+  hardware ethernet 11:22:33:44:55:01;
+  fixed-address 192.168.1.10;
+  option host-name "web-server";
+  set hostname-override = config-option host-name;
+}
+
+host server2 {
+  hardware ethernet 11:22:33:44:55:02;
+  fixed-address 192.168.1.11;
+  option host-name "database-server";
+  set hostname-override = config-option host-name;
+}
+
+host nas {
+  hardware ethernet 11:22:33:44:55:03;
+  fixed-address 192.168.1.12;
+  option host-name "file-server";
+  set hostname-override = config-option host-name;
+}
+
+subnet 192.168.2.0 netmask 255.255.255.0 {
+  pool {
+    option domain-name-servers 8.8.8.8,1.1.1.1;
+    range 192.168.2.100 192.168.2.200;
+  }
+
+  option routers 192.168.2.1;
+  option domain-name-servers 8.8.8.8,1.1.1.1;
+}
+
+host iot1 {
+  hardware ethernet 11:22:33:44:55:10;
+  fixed-address 192.168.2.20;
+  option host-name "smart-thermostat";
+  set hostname-override = config-option host-name;
+}
+
+host iot2 {
+  hardware ethernet 11:22:33:44:55:11;
+  fixed-address 192.168.2.21;
+  option host-name "security-camera";
+  set hostname-override = config-option host-name;
+}
+
+host iot3 {
+  hardware ethernet 11:22:33:44:55:12;
+  fixed-address 192.168.2.22;
+  option host-name "smart-switch";
+  set hostname-override = config-option host-name;
+}
